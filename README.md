@@ -1,4 +1,4 @@
 # toDoList
 to do list
 
-using realm to save data.
+using realm to save local data.
