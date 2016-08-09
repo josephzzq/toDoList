@@ -72,15 +72,15 @@ class TaskListsViewController: UIViewController, UITableViewDelegate, UITableVie
     
     func displayAlertToAddTaskList(updatedList:TaskList!){
         
-        var title = "New Tasks List"
+        var title = "New Tasks"
         var doneTitle = "Create"
         if updatedList != nil{
-            title = "Update Tasks List"
+            title = "Update Tasks"
             doneTitle = "Update"
         }
         
         
-        let alertController = UIAlertController(title: title, message: "Write the name of your tasks list.", preferredStyle: UIAlertControllerStyle.Alert)
+        let alertController = UIAlertController(title: title, message: "Write the name of your task.", preferredStyle: UIAlertControllerStyle.Alert)
         let createAction = UIAlertAction(title: doneTitle, style: UIAlertActionStyle.Default) { (action) -> Void in
             
             let listName = alertController.textFields?.first?.text
@@ -128,7 +128,7 @@ class TaskListsViewController: UIViewController, UITableViewDelegate, UITableVie
         alertController.addAction(UIAlertAction(title: "Cancel", style: UIAlertActionStyle.Cancel, handler: nil))
         
         alertController.addTextFieldWithConfigurationHandler { (textField) -> Void in
-            textField.placeholder = "Task List Name"
+            textField.placeholder = "Task Name"
             textField.addTarget(self, action: "listNameFieldDidChange:", forControlEvents: UIControlEvents.EditingChanged)
             if updatedList != nil{
                 textField.text = updatedList.name
@@ -153,6 +153,8 @@ class TaskListsViewController: UIViewController, UITableViewDelegate, UITableVie
         let cell = tableView.dequeueReusableCellWithIdentifier("listCell")
         
         let list = lists[indexPath.row]
+        
+        cell?.selectionStyle=UITableViewCellSelectionStyle.None
         
         cell?.textLabel?.text = list.name
         cell?.detailTextLabel?.text = "\(list.tasks.count) Tasks"

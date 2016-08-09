@@ -79,6 +79,8 @@ class TasksViewController: UIViewController, UITableViewDelegate, UITableViewDat
             task = completedTasks[indexPath.row]
         }
         
+        cell?.selectionStyle=UITableViewCellSelectionStyle.None
+        
         cell?.textLabel?.text = task.name
         return cell!
     }
