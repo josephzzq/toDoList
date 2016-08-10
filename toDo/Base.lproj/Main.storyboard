@@ -24,6 +24,7 @@
                                 <segmentedControl key="tableHeaderView" opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="top" segmentControlStyle="plain" id="kra-Nq-uUZ">
                                     <rect key="frame" x="0.0" y="0.0" width="600" height="30"/>
                                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                    <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
                                     <segments>
                                         <segment title="A-Z"/>
                                         <segment title="Date"/>
@@ -51,7 +52,7 @@
                                                     <rect key="frame" x="523.5" y="13" width="41.5" height="19.5"/>
                                                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                                     <fontDescription key="fontDescription" type="system" pointSize="16"/>
-                                                    <color key="textColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                                    <color key="textColor" red="0.55686274509803924" green="0.55686274509803924" blue="0.57647058823529407" alpha="1" colorSpace="calibratedRGB"/>
                                                     <nil key="highlightedColor"/>
                                                 </label>
                                             </subviews>
@@ -78,12 +79,12 @@
                     <navigationItem key="navigationItem" title="My Lists" id="BXw-P0-bak">
                         <barButtonItem key="leftBarButtonItem" systemItem="edit" id="Gws-v4-BK9">
                             <connections>
-                                <action selector="didClickOnEditButton:" destination="aa4-L9-zR8" id="eZZ-En-CMO"/>
+                                <action selector="editTaskBtn:" destination="aa4-L9-zR8" id="0Vw-6f-L6E"/>
                             </connections>
                         </barButtonItem>
                         <barButtonItem key="rightBarButtonItem" systemItem="add" id="hLe-DY-Okw">
                             <connections>
-                                <action selector="didClickOnAddButton:" destination="aa4-L9-zR8" id="VSg-lt-pk6"/>
+                                <action selector="addTaskBtn:" destination="aa4-L9-zR8" id="B6Q-7H-V1D"/>
                             </connections>
                         </barButtonItem>
                     </navigationItem>
