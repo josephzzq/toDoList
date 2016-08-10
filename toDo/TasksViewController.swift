@@ -104,7 +104,7 @@ class TasksViewController: UIViewController, UITableViewDelegate, UITableViewDat
                 // update mode
                 
                 do{
-                    try uiRealm.write({ () -> Void in
+                    try realmInstance.write({ () -> Void in
                         updatedTask.name = taskName!
                         self.readTasksAndUpateUI()
                     })
@@ -122,7 +122,7 @@ class TasksViewController: UIViewController, UITableViewDelegate, UITableViewDat
                 
                 
                 do{
-                    try uiRealm.write({ () -> Void in
+                    try realmInstance.write({ () -> Void in
                         self.selectedList.tasks.append(newTask)
                         self.readTasksAndUpateUI()
                     })
@@ -175,8 +175,8 @@ class TasksViewController: UIViewController, UITableViewDelegate, UITableViewDat
             }
             
             do{
-               try uiRealm.write({ () -> Void in
-                    uiRealm.delete(taskToBeDeleted)
+               try realmInstance.write({ () -> Void in
+                    realmInstance.delete(taskToBeDeleted)
                     self.readTasksAndUpateUI()
                 })
             }
@@ -211,7 +211,7 @@ class TasksViewController: UIViewController, UITableViewDelegate, UITableViewDat
             }
             
             do{
-                try uiRealm.write({ () -> Void in
+                try realmInstance.write({ () -> Void in
                     taskToBeUpdated.isCompleted = true
                     self.readTasksAndUpateUI()
                 })
