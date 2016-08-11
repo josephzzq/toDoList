@@ -8,7 +8,7 @@
 
 import UIKit
 import RealmSwift
-
+import Charts
 
 class TasksViewController: UIViewController, UITableViewDelegate, UITableViewDataSource {
     
@@ -19,12 +19,23 @@ class TasksViewController: UIViewController, UITableViewDelegate, UITableViewDat
     
     var isEditingMode = false
     
+    var footerView = PieChartView()
+    
     @IBOutlet weak var tasksTableView: UITableView!
+    
     override func viewDidLoad() {
         super.viewDidLoad()
 
         self.title = selectedList.name
+ 
+        footerView.noDataText=""
         readTasksAndUpateUI()
+    }
+    
+    override func viewDidAppear(animated: Bool) {
+        super.viewDidAppear(true)
+        footerView.centerText="\(self.title!) List %"
+        self .chartMethod()
     }
     
     
@@ -37,6 +48,7 @@ class TasksViewController: UIViewController, UITableViewDelegate, UITableViewDat
     @IBAction func didClickOnNewTask(sender: AnyObject) {
         self.displayAlertToAddTask(nil)
     }
+    
     func readTasksAndUpateUI(){
         
         completedTasks = self.selectedList.tasks.filter("isCompleted = true")
@@ -44,6 +56,58 @@ class TasksViewController: UIViewController, UITableViewDelegate, UITableViewDat
         
         self.tasksTableView.reloadData()
     }
+    
+    func chartMethod(){
+        let status = ["open","finish"]
+        let statusAmount = [self.ratio(self.openTasks.count),ratio(self.completedTasks.count)]
+        
+        guard statusAmount[0].isNaN || statusAmount[1] .isNaN else{
+            self.setChart(status, values: statusAmount)
+            return
+        }
+    }
+    
+    func ratio(count: Int) -> Double {
+        let totalCount = completedTasks.count+openTasks.count
+        let ratio = Double(count)/Double(totalCount)*Double(100)
+        return ratio
+    }
+    
+    func setChart(dataPoints: [String], values: [Double]) {
+        
+        var dataEntries: [ChartDataEntry] = []
+        
+        for i in 0..<dataPoints.count {
+            let dataEntry = ChartDataEntry(value: values[i], xIndex: i)
+            dataEntries.append(dataEntry)
+        }
+        
+        // setup x,y val
+        let pieChartDataSet = PieChartDataSet(yVals: dataEntries, label: "Units Sold")
+        let pieChartData = PieChartData(xVals: dataPoints, dataSet: pieChartDataSet)
+        footerView.data = pieChartData
+       
+        // setup %
+        let formatter = NSNumberFormatter()
+        formatter.numberStyle = .PercentStyle
+        formatter.maximumFractionDigits = 1
+        formatter.multiplier = 1.0
+        pieChartDataSet.valueFormatter = formatter
+        
+        // setup ramdom color
+        var colors: [UIColor] = []
+        for i in 0..<dataPoints.count {
+            let red = Double(arc4random_uniform(256))
+            let green = Double(arc4random_uniform(256))
+            let blue = Double(arc4random_uniform(256))
+            
+            let color = UIColor(red: CGFloat(red/255), green: CGFloat(green/255), blue: CGFloat(blue/255), alpha: 1)
+            colors.append(color)
+        }
+        pieChartDataSet.colors = colors
+        footerView.animate(xAxisDuration: 1.4, yAxisDuration: 1.4)
+    }
+
 
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
@@ -53,7 +117,7 @@ class TasksViewController: UIViewController, UITableViewDelegate, UITableViewDat
     
     // MARK: - UITableViewDataSource -
     func numberOfSectionsInTableView(tableView: UITableView) -> Int {
-        return 2
+        return 3
     }
     func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int{
         if section == 0{
@@ -68,6 +132,28 @@ class TasksViewController: UIViewController, UITableViewDelegate, UITableViewDat
         }
         return "COMPLETED TASKS"
     }
+    
+    func tableView(tableView: UITableView, heightForFooterInSection section: Int) -> CGFloat {
+        
+        if section==1 {
+            return 300
+        }
+        return 0
+    }
+    
+    func tableView(tableView: UITableView, viewForFooterInSection section: Int) -> UIView? {
+        
+        if section==1 {
+            let footerView=UIView(frame: CGRectMake(0, 0,self.view.frame.width, 0))
+
+//            self.footerView.backgroundColor=UIColor.purpleColor()
+            self.footerView.frame=footerView.frame
+            
+            return self.footerView
+        }
+        return nil
+    }
+    
     
     func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell{
         let cell = tableView.dequeueReusableCellWithIdentifier("cell")
@@ -101,7 +187,7 @@ class TasksViewController: UIViewController, UITableViewDelegate, UITableViewDat
             let taskName = alertController.textFields?.first?.text
             
             if updatedTask != nil{
-                // update mode
+                // update task
                 
                 do{
                     try realmInstance.write({ () -> Void in
@@ -116,7 +202,7 @@ class TasksViewController: UIViewController, UITableViewDelegate, UITableViewDat
          
             }
             else{
-                
+                // new task
                 let newTask = Task()
                 newTask.name = taskName!
                 
@@ -125,6 +211,7 @@ class TasksViewController: UIViewController, UITableViewDelegate, UITableViewDat
                     try realmInstance.write({ () -> Void in
                         self.selectedList.tasks.append(newTask)
                         self.readTasksAndUpateUI()
+                        self.chartMethod()
                     })
                 }
                 catch (let e){
@@ -164,8 +251,7 @@ class TasksViewController: UIViewController, UITableViewDelegate, UITableViewDat
     func tableView(tableView: UITableView, editActionsForRowAtIndexPath indexPath: NSIndexPath) -> [UITableViewRowAction]? {
         let deleteAction = UITableViewRowAction(style: UITableViewRowActionStyle.Destructive, title: "Delete") { (deleteAction, indexPath) -> Void in
             
-            //Deletion will go here
-            
+            //1.Delete
             var taskToBeDeleted: Task!
             if indexPath.section == 0{
                 taskToBeDeleted = self.openTasks[indexPath.row]
@@ -178,6 +264,7 @@ class TasksViewController: UIViewController, UITableViewDelegate, UITableViewDat
                try realmInstance.write({ () -> Void in
                     realmInstance.delete(taskToBeDeleted)
                     self.readTasksAndUpateUI()
+                    self.chartMethod()
                 })
             }
             catch (let e){
@@ -187,7 +274,7 @@ class TasksViewController: UIViewController, UITableViewDelegate, UITableViewDat
         }
         let editAction = UITableViewRowAction(style: UITableViewRowActionStyle.Normal, title: "Edit") { (editAction, indexPath) -> Void in
             
-            // Editing will go here
+            //2.Editing
             var taskToBeUpdated: Task!
             if indexPath.section == 0{
                 taskToBeUpdated = self.openTasks[indexPath.row]
@@ -201,7 +288,8 @@ class TasksViewController: UIViewController, UITableViewDelegate, UITableViewDat
         }
         
         let doneAction = UITableViewRowAction(style: UITableViewRowActionStyle.Normal, title: "Done") { (doneAction, indexPath) -> Void in
-            // Editing will go here
+            
+            //3.Done
             var taskToBeUpdated: Task!
             if indexPath.section == 0{
                 taskToBeUpdated = self.openTasks[indexPath.row]
@@ -214,6 +302,7 @@ class TasksViewController: UIViewController, UITableViewDelegate, UITableViewDat
                 try realmInstance.write({ () -> Void in
                     taskToBeUpdated.isCompleted = true
                     self.readTasksAndUpateUI()
+                    self.chartMethod()
                 })
             }
             catch (let e){
