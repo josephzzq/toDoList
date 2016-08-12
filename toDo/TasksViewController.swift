@@ -13,7 +13,8 @@ import Charts
 class TasksViewController: UIViewController, UITableViewDelegate, UITableViewDataSource {
     
     var selectedList : TaskList!
-    var openTasks : Results<Task>!
+    var inProgressTasks : Results<Task>!
+    var pendingTasks : Results<Task>!
     var completedTasks : Results<Task>!
     var currentCreateAction:UIAlertAction!
     
@@ -30,6 +31,8 @@ class TasksViewController: UIViewController, UITableViewDelegate, UITableViewDat
  
         footerView.noDataText=""
         readTasksAndUpateUI()
+        
+        
     }
     
     override func viewDidAppear(animated: Bool) {
@@ -51,25 +54,49 @@ class TasksViewController: UIViewController, UITableViewDelegate, UITableViewDat
     
     func readTasksAndUpateUI(){
         
-        completedTasks = self.selectedList.tasks.filter("isCompleted = true")
-        openTasks = self.selectedList.tasks.filter("isCompleted = false")
+        inProgressTasks = self.selectedList.tasks.filter("todoListStatus = 'InProgress'")
+        pendingTasks = self.selectedList.tasks.filter("todoListStatus = 'Pending'")
+        completedTasks = self.selectedList.tasks.filter("todoListStatus = 'Done'")
         
         self.tasksTableView.reloadData()
     }
     
     func chartMethod(){
-        let status = ["open","finish"]
-        let statusAmount = [self.ratio(self.openTasks.count),ratio(self.completedTasks.count)]
         
-        guard statusAmount[0].isNaN || statusAmount[1] .isNaN else{
-            self.setChart(status, values: statusAmount)
+        let progressRatio = ratio(inProgressTasks.count)
+        let pendingRatio = ratio(pendingTasks.count)
+        let completeRatio = ratio(completedTasks.count)
+        
+        var pieChartStatusPercent : [Double]=[]
+        var pieChartStatus : [String]=[]
+        
+        if progressRatio > 0.0 {
+            pieChartStatusPercent.append(progressRatio)
+            pieChartStatus.append("Work")
+        }
+        
+        if pendingRatio > 0.0 {
+            pieChartStatusPercent.append(pendingRatio)
+            pieChartStatus.append("Pending")
+        }
+        
+        if completeRatio > 0.0 {
+            pieChartStatusPercent.append(completeRatio)
+            pieChartStatus.append("Finish")
+        }
+
+        guard  pieChartStatusPercent.isEmpty else{
+            self.setChart(pieChartStatus, values: pieChartStatusPercent)
             return
         }
     }
     
     func ratio(count: Int) -> Double {
-        let totalCount = completedTasks.count+openTasks.count
+        let totalCount = completedTasks.count+inProgressTasks.count+pendingTasks.count
         let ratio = Double(count)/Double(totalCount)*Double(100)
+        if ratio.isNaN {
+            return 0.0
+        }
         return ratio
     }
     
@@ -82,11 +109,8 @@ class TasksViewController: UIViewController, UITableViewDelegate, UITableViewDat
             dataEntries.append(dataEntry)
         }
         
-        // setup x,y val
-        let pieChartDataSet = PieChartDataSet(yVals: dataEntries, label: "Units Sold")
-        let pieChartData = PieChartData(xVals: dataPoints, dataSet: pieChartDataSet)
-        footerView.data = pieChartData
-       
+        let pieChartDataSet = PieChartDataSet(yVals: dataEntries, label: "%")
+        
         // setup %
         let formatter = NSNumberFormatter()
         formatter.numberStyle = .PercentStyle
@@ -94,6 +118,12 @@ class TasksViewController: UIViewController, UITableViewDelegate, UITableViewDat
         formatter.multiplier = 1.0
         pieChartDataSet.valueFormatter = formatter
         
+        // custom legend label color
+        let legend = footerView.legend
+        legend.textColor=UIColor .whiteColor()
+        legend.position=ChartLegend.Position.BelowChartCenter
+//        legend.setCustom(colors: [UIColor.whiteColor(), UIColor.whiteColor(), UIColor.whiteColor()], labels: ["Work", "Pending", "Finish"])
+
         // setup ramdom color
         var colors: [UIColor] = []
         for i in 0..<dataPoints.count {
@@ -103,9 +133,15 @@ class TasksViewController: UIViewController, UITableViewDelegate, UITableViewDat
             
             let color = UIColor(red: CGFloat(red/255), green: CGFloat(green/255), blue: CGFloat(blue/255), alpha: 1)
             colors.append(color)
+            
+            pieChartDataSet.colors = colors
         }
-        pieChartDataSet.colors = colors
+
+        // setup x,y val
+        let pieChartData = PieChartData(xVals: dataPoints, dataSet: pieChartDataSet)
+        footerView.data = pieChartData
         footerView.animate(xAxisDuration: 1.4, yAxisDuration: 1.4)
+        footerView.descriptionText=""
     }
 
 
@@ -121,21 +157,25 @@ class TasksViewController: UIViewController, UITableViewDelegate, UITableViewDat
     }
     func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int{
         if section == 0{
-            return openTasks.count
+            return inProgressTasks.count
+        } else if section == 1{
+            return pendingTasks.count
         }
         return completedTasks.count
     }
     func tableView(tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
         
         if section == 0{
-            return "OPEN TASKS"
+            return "IN PROGRESS - TASKS"
+        }else if section == 1{
+            return "PENDING - TASKS"
         }
-        return "COMPLETED TASKS"
+        return "COMPLETED - TASKS"
     }
     
     func tableView(tableView: UITableView, heightForFooterInSection section: Int) -> CGFloat {
         
-        if section==1 {
+        if section==2 {
             return 300
         }
         return 0
@@ -143,12 +183,9 @@ class TasksViewController: UIViewController, UITableViewDelegate, UITableViewDat
     
     func tableView(tableView: UITableView, viewForFooterInSection section: Int) -> UIView? {
         
-        if section==1 {
+        if section==2 {
             let footerView=UIView(frame: CGRectMake(0, 0,self.view.frame.width, 0))
-
-//            self.footerView.backgroundColor=UIColor.purpleColor()
             self.footerView.frame=footerView.frame
-            
             return self.footerView
         }
         return nil
@@ -159,9 +196,11 @@ class TasksViewController: UIViewController, UITableViewDelegate, UITableViewDat
         let cell = tableView.dequeueReusableCellWithIdentifier("cell")
         var task: Task!
         if indexPath.section == 0{
-            task = openTasks[indexPath.row]
+            task = inProgressTasks[indexPath.row]
         }
-        else{
+        else if indexPath.section == 1 {
+            task = pendingTasks[indexPath.row]
+        }else{
             task = completedTasks[indexPath.row]
         }
         
@@ -188,7 +227,6 @@ class TasksViewController: UIViewController, UITableViewDelegate, UITableViewDat
             
             if updatedTask != nil{
                 // update task
-                
                 do{
                     try realmInstance.write({ () -> Void in
                         updatedTask.name = taskName!
@@ -198,15 +236,13 @@ class TasksViewController: UIViewController, UITableViewDelegate, UITableViewDat
                 catch (let e){
                     
                 }
-                
-         
+
             }
             else{
                 // new task
                 let newTask = Task()
                 newTask.name = taskName!
-                
-                
+            
                 do{
                     try realmInstance.write({ () -> Void in
                         self.selectedList.tasks.append(newTask)
@@ -217,12 +253,8 @@ class TasksViewController: UIViewController, UITableViewDelegate, UITableViewDat
                 catch (let e){
                     
                 }
-                
             }
-            
-            
-            
-            print(taskName, terminator: "")
+
         }
         
         alertController.addAction(createAction)
@@ -254,9 +286,10 @@ class TasksViewController: UIViewController, UITableViewDelegate, UITableViewDat
             //1.Delete
             var taskToBeDeleted: Task!
             if indexPath.section == 0{
-                taskToBeDeleted = self.openTasks[indexPath.row]
-            }
-            else{
+                taskToBeDeleted = self.inProgressTasks[indexPath.row]
+            }else if indexPath.section == 1{
+                taskToBeDeleted = self.pendingTasks[indexPath.row]
+            }else{
                 taskToBeDeleted = self.completedTasks[indexPath.row]
             }
             
@@ -277,9 +310,10 @@ class TasksViewController: UIViewController, UITableViewDelegate, UITableViewDat
             //2.Editing
             var taskToBeUpdated: Task!
             if indexPath.section == 0{
-                taskToBeUpdated = self.openTasks[indexPath.row]
-            }
-            else{
+                taskToBeUpdated = self.inProgressTasks[indexPath.row]
+            }else if indexPath.section == 1{
+                taskToBeUpdated = self.pendingTasks[indexPath.row]
+            }else{
                 taskToBeUpdated = self.completedTasks[indexPath.row]
             }
             
@@ -287,20 +321,21 @@ class TasksViewController: UIViewController, UITableViewDelegate, UITableViewDat
             
         }
         
-        let doneAction = UITableViewRowAction(style: UITableViewRowActionStyle.Normal, title: "Done") { (doneAction, indexPath) -> Void in
+        let pendingAction = UITableViewRowAction(style: UITableViewRowActionStyle.Normal, title: "Pending") { (doneAction, indexPath) -> Void in
             
-            //3.Done
+            //3.Pending
             var taskToBeUpdated: Task!
             if indexPath.section == 0{
-                taskToBeUpdated = self.openTasks[indexPath.row]
-            }
-            else{
+                taskToBeUpdated = self.inProgressTasks[indexPath.row]
+            }else if indexPath.section == 1{
+                taskToBeUpdated = self.pendingTasks[indexPath.row]
+            }else{
                 taskToBeUpdated = self.completedTasks[indexPath.row]
             }
             
             do{
                 try realmInstance.write({ () -> Void in
-                    taskToBeUpdated.isCompleted = true
+                    taskToBeUpdated.todoListStatus = "Pending"
                     self.readTasksAndUpateUI()
                     self.chartMethod()
                 })
@@ -310,6 +345,31 @@ class TasksViewController: UIViewController, UITableViewDelegate, UITableViewDat
             }
             
         }
-        return [deleteAction, editAction, doneAction]
+        
+        let doneAction = UITableViewRowAction(style: UITableViewRowActionStyle.Normal, title: "Done") { (doneAction, indexPath) -> Void in
+            
+            //4.Done
+            var taskToBeUpdated: Task!
+            if indexPath.section == 0{
+                taskToBeUpdated = self.inProgressTasks[indexPath.row]
+            }else if indexPath.section == 1{
+                taskToBeUpdated = self.pendingTasks[indexPath.row]
+            }else{
+                taskToBeUpdated = self.completedTasks[indexPath.row]
+            }
+            
+            do{
+                try realmInstance.write({ () -> Void in
+                      taskToBeUpdated.todoListStatus = "Done"
+                    self.readTasksAndUpateUI()
+                    self.chartMethod()
+                })
+            }
+            catch (let e){
+                
+            }
+            
+        }
+        return [deleteAction, editAction, pendingAction, doneAction]
     }
 }

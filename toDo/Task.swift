@@ -8,10 +8,17 @@
 
 import RealmSwift
 
+
+enum listStatus:String {
+    case InProgress
+    case Pending
+    case Done
+}
+
+
 class Task: Object {
-    
     dynamic var name = ""
     dynamic var createdAt = NSDate()
     dynamic var notes = ""
-    dynamic var isCompleted = false
+    dynamic var todoListStatus = listStatus.InProgress.rawValue
 }
