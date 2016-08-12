@@ -87,8 +87,11 @@ class TasksViewController: UIViewController, UITableViewDelegate, UITableViewDat
 
         guard  pieChartStatusPercent.isEmpty else{
             self.setChart(pieChartStatus, values: pieChartStatusPercent)
+            footerView.hidden=false
             return
         }
+        
+        footerView.hidden=true
     }
     
     func ratio(count: Int) -> Double {
@@ -176,7 +179,7 @@ class TasksViewController: UIViewController, UITableViewDelegate, UITableViewDat
     func tableView(tableView: UITableView, heightForFooterInSection section: Int) -> CGFloat {
         
         if section==2 {
-            return 300
+            return self.view.frame.width*0.9
         }
         return 0
     }

@@ -77,16 +77,18 @@
                     </view>
                     <extendedEdge key="edgesForExtendedLayout"/>
                     <navigationItem key="navigationItem" title="My Lists" id="BXw-P0-bak">
-                        <barButtonItem key="leftBarButtonItem" systemItem="edit" id="Gws-v4-BK9">
-                            <connections>
-                                <action selector="editTaskBtn:" destination="aa4-L9-zR8" id="0Vw-6f-L6E"/>
-                            </connections>
-                        </barButtonItem>
-                        <barButtonItem key="rightBarButtonItem" systemItem="add" id="hLe-DY-Okw">
-                            <connections>
-                                <action selector="addTaskBtn:" destination="aa4-L9-zR8" id="B6Q-7H-V1D"/>
-                            </connections>
-                        </barButtonItem>
+                        <rightBarButtonItems>
+                            <barButtonItem systemItem="add" id="hLe-DY-Okw">
+                                <connections>
+                                    <action selector="addTaskBtn:" destination="aa4-L9-zR8" id="B6Q-7H-V1D"/>
+                                </connections>
+                            </barButtonItem>
+                            <barButtonItem systemItem="edit" id="Gws-v4-BK9">
+                                <connections>
+                                    <action selector="editTaskBtn:" destination="aa4-L9-zR8" id="0Vw-6f-L6E"/>
+                                </connections>
+                            </barButtonItem>
+                        </rightBarButtonItems>
                     </navigationItem>
                     <connections>
                         <outlet property="taskListsTableView" destination="W2T-eU-GOL" id="tlz-Zd-StT"/>
