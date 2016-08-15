@@ -8,6 +8,8 @@ target 'toDo' do
 pod 'RealmSwift'
 pod 'Charts', '~> 2.2.5'
 
+pod 'Firebase/Core'
+pod 'Firebase/AdMob'
 
 end
 

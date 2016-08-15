@@ -8,28 +8,98 @@
 
 import UIKit
 import RealmSwift
+import GoogleMobileAds
 
-class TaskListsViewController: UIViewController, UITableViewDelegate, UITableViewDataSource {
+class TaskListsViewController: UIViewController, UITableViewDelegate, UITableViewDataSource, GADBannerViewDelegate, GADInterstitialDelegate{
 
     var lists : Results<TaskList>!
     var isEditingMode = false
     var currentCreateAction:UIAlertAction!
     
     @IBOutlet weak var taskListsTableView: UITableView!
+    @IBOutlet weak var bannerView: GADBannerView!
+    var interstitial:GADInterstitial!
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        // setup admob
+        print("Google Mobile Ads SDK version: " + GADRequest.sdkVersion())
+        bannerView.adUnitID = "ca-app-pub-3940256099942544/2934735716"
+        bannerView.rootViewController = self
+        bannerView.loadRequest(GADRequest())
+        bannerView.delegate=self
+    
+//        self.createLoadInterstitial()
     }
     
     override func viewWillAppear(animated: Bool) {
         readTasksAndUpdateUI()
     }
     
-
-
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
+    }
+    
+    // TODO: need move to welcome page
+    func createLoadInterstitial(){
+        interstitial = GADInterstitial(adUnitID: "ca-app-pub-3940256099942544/4411468910")
+        let request = GADRequest()
+        // Request test ads on devices you specify. Your test device ID is printed to the console when
+        // an ad request is made.
+        request.testDevices = [ kGADSimulatorID, "2e774b2da80a408a362abcf758084c55" ]
+        interstitial.loadRequest(request)
+        interstitial.delegate = self
+    }
+    
+    // MARK: GADInterstitialDelegate delegate
+    func interstitialDidReceiveAd(ad: GADInterstitial!) {
+        /// Called when an interstitial ad request succeeded.
+        print("interstitialDidReceiveAd")
+        if interstitial.isReady {
+            interstitial.presentFromRootViewController(self)
+        }
+    }
+    
+    /// Called when an interstitial ad request failed.
+    func interstitial(ad: GADInterstitial!, didFailToReceiveAdWithError error: GADRequestError!) {
+        print("interstitial:didFailToReceiveAdWithError: \(error.localizedDescription)")
+    }
+    
+    /// Called just before presenting an interstitial.
+    func interstitialWillPresentScreen(ad: GADInterstitial!) {
+        print("interstitialWillPresentScreen")
+    }
+    
+    /// Called before the interstitial is to be animated off the screen.
+    func interstitialWillDismissScreen(ad: GADInterstitial!) {
+        print("interstitialWillDismissScreen")
+    }
+    
+    /// Called just after dismissing an interstitial and it has animated off the screen.
+    func interstitialDidDismissScreen(ad: GADInterstitial!) {
+        print("interstitialDidDismissScreen")
+    }
+    
+    /// Called just before the application will background or terminate because the user clicked on an
+    /// ad that will launch another app (such as the App Store).
+    func interstitialWillLeaveApplication(ad: GADInterstitial!) {
+        print("interstitialWillLeaveApplication")
+    }
+    
+    
+    // MARK: GADBannerView delegate
+    func adViewDidReceiveAd(bannerView: GADBannerView!) {
+        bannerView.hidden=false
+        bannerView.alpha=0
+        UIView.animateWithDuration(1, animations: {
+            bannerView.alpha=1
+        })
+    }
+    
+    func adView(bannerView: GADBannerView!, didFailToReceiveAdWithError error: GADRequestError!) {
+        print("adView:didFailToReceiveAdWithError:\(error.localizedDescription)")
     }
     
     // MARK: Actions

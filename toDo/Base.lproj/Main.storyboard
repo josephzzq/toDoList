@@ -3,6 +3,7 @@
     <dependencies>
         <deployment identifier="iOS"/>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="10085"/>
+        <capability name="Constraints to layout margins" minToolsVersion="6.0"/>
         <capability name="Navigation items with more than one left or right bar item" minToolsVersion="7.0"/>
     </dependencies>
     <scenes>
@@ -19,7 +20,7 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="none" rowHeight="44" sectionHeaderHeight="28" sectionFooterHeight="28" translatesAutoresizingMaskIntoConstraints="NO" id="W2T-eU-GOL">
-                                <rect key="frame" x="0.0" y="0.0" width="600" height="536"/>
+                                <rect key="frame" x="0.0" y="0.0" width="600" height="484"/>
                                 <color key="backgroundColor" white="0.0" alpha="1" colorSpace="calibratedWhite"/>
                                 <segmentedControl key="tableHeaderView" opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="top" segmentControlStyle="plain" id="kra-Nq-uUZ">
                                     <rect key="frame" x="0.0" y="0.0" width="600" height="30"/>
@@ -66,14 +67,32 @@
                                     <outlet property="delegate" destination="aa4-L9-zR8" id="jhp-IY-nGf"/>
                                 </connections>
                             </tableView>
+                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="i26-Gr-gvk" customClass="GADBannerView">
+                                <rect key="frame" x="0.0" y="484" width="600" height="52"/>
+                                <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                            </view>
                         </subviews>
-                        <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
+                        <color key="backgroundColor" white="0.0" alpha="1" colorSpace="calibratedWhite"/>
                         <constraints>
+                            <constraint firstItem="2HV-uk-4HO" firstAttribute="top" secondItem="i26-Gr-gvk" secondAttribute="bottom" id="1Xt-3w-rrF"/>
                             <constraint firstItem="W2T-eU-GOL" firstAttribute="width" secondItem="AxD-f5-ds9" secondAttribute="width" id="6At-8y-FNa"/>
+                            <constraint firstAttribute="trailingMargin" secondItem="i26-Gr-gvk" secondAttribute="trailing" constant="-20" id="7UJ-oa-wAl"/>
                             <constraint firstItem="W2T-eU-GOL" firstAttribute="top" secondItem="B70-dp-9bt" secondAttribute="bottom" id="Lwd-Y0-4UX"/>
-                            <constraint firstItem="W2T-eU-GOL" firstAttribute="height" secondItem="AxD-f5-ds9" secondAttribute="height" id="bCY-CT-azF"/>
+                            <constraint firstItem="W2T-eU-GOL" firstAttribute="height" secondItem="AxD-f5-ds9" secondAttribute="height" constant="-52" id="bCY-CT-azF"/>
                             <constraint firstItem="W2T-eU-GOL" firstAttribute="leading" secondItem="AxD-f5-ds9" secondAttribute="leading" id="cFw-6N-Vil"/>
+                            <constraint firstAttribute="trailing" secondItem="i26-Gr-gvk" secondAttribute="trailing" id="csw-0T-MQa"/>
+                            <constraint firstItem="i26-Gr-gvk" firstAttribute="top" secondItem="W2T-eU-GOL" secondAttribute="bottom" id="hlr-Cj-RJT"/>
+                            <constraint firstItem="i26-Gr-gvk" firstAttribute="leading" secondItem="AxD-f5-ds9" secondAttribute="leadingMargin" constant="-20" id="nlH-jB-hlx"/>
+                            <constraint firstItem="i26-Gr-gvk" firstAttribute="leading" secondItem="AxD-f5-ds9" secondAttribute="leading" id="rT2-9N-XSr"/>
+                            <constraint firstItem="2HV-uk-4HO" firstAttribute="top" secondItem="i26-Gr-gvk" secondAttribute="bottom" id="wNl-N9-LyE"/>
                         </constraints>
+                        <variation key="default">
+                            <mask key="constraints">
+                                <exclude reference="7UJ-oa-wAl"/>
+                                <exclude reference="nlH-jB-hlx"/>
+                                <exclude reference="wNl-N9-LyE"/>
+                            </mask>
+                        </variation>
                     </view>
                     <extendedEdge key="edgesForExtendedLayout"/>
                     <navigationItem key="navigationItem" title="My Lists" id="BXw-P0-bak">
@@ -91,6 +110,7 @@
                         </rightBarButtonItems>
                     </navigationItem>
                     <connections>
+                        <outlet property="bannerView" destination="i26-Gr-gvk" id="xc8-V6-wg8"/>
                         <outlet property="taskListsTableView" destination="W2T-eU-GOL" id="tlz-Zd-StT"/>
                         <segue destination="6ot-j5-6Iu" kind="push" identifier="openTasks" id="QFg-a5-2xR"/>
                     </connections>
